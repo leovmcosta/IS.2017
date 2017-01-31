@@ -9,15 +9,15 @@ from api import State, util
 
 # This package contains various machine learning algorithms
 import sys
-import sklearn
+import sklearn, inspect, os
 import sklearn.linear_model
 from sklearn.externals import joblib
 
 from bots.rand import rand
-# from bots.alphabeta import alphabeta
+from bots.alphabeta import alphabeta
 from bots.ml import ml
 
-from bots.ml.ml import features
+from bots.ml.ml import four_dimension_features
 
 import matplotlib.pyplot as plt
 
@@ -44,7 +44,7 @@ for g in range(GAMES):
     state_vectors = []
     i = 0
     while not state.finished() and i <= NUM_TURNS:
-        state_vectors.append(features(state))
+        state_vectors.append(four_dimension_features(state))
 
         move = player.get_move(state)
         state = state.next(move)
@@ -84,7 +84,10 @@ for str in target:
 print('instances per class: {}'.format(count))
 
 # Store the model in the ml directory
-joblib.dump(model, './bots/ml/model.pkl')
+classpath = inspect.getfile(player.__class__)
+base = os.path.basename(classpath)
+filename = './bots/ml/'+os.path.splitext(base)[0]+'-model.pkl'
+joblib.dump(model, filename)
 
 print('Done')
 

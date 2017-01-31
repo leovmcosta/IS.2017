@@ -7,7 +7,7 @@
 from api import State, util
 import random
 
-from kb import KB, Boolean, Integer
+from bots.smt.kb import KB, Boolean, Integer
 
 class Bot:
 
@@ -95,10 +95,15 @@ class Bot:
         m = Integer("m") # how many ships player one will have (when the heuristic is computed)
         h = Integer("h") # how many ships player two will have
 
+        clause_one = v > a
+        clause_two = v < b
+        clause_three = v  == m - h
+
         kb = KB()
 
         # Add clauses
-        ???
+        kb.add_clause(clause_one, clause_two)
+        kb.add_clause(clause_three)
 
         sat = kb.satisfiable()
 

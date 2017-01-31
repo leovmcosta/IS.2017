@@ -58,7 +58,8 @@ class Bot:
 
         for move in moves:
 
-            value ???
+            next_state = state.next(move)
+            value, m = self.value(next_state, alpha, beta, depth + 1)
 
             if maximizing(state):
                 if value > best_value:
@@ -73,20 +74,21 @@ class Bot:
 
             # Prune the search tree
             # We know this state will never be chosen, so we stop evaluating its children
-            if ???:
+            if alpha > beta or beta < alpha:
                 break
 
         return best_value, best_move
 
     def heuristic(self, state):
         # Convert the state to a feature vector
-        feature_vector = [features(state)]
+        feature_vector = [four_dimension_features(state)]
 
         # These are the classes: ('won', 'lost')
         classes = list(self.__model.classes_)
 
         # Ask the model for a prediction
         # This returns a probability for each class
+        # print('{}'.format(feature_vector[0]))
         prob = self.__model.predict_proba(feature_vector)[0]
         # print('{} {} {}'.format(classes, prob, util.ratio_ships(state, 1)))
 
@@ -105,7 +107,7 @@ def maximizing(state):
     return state.whose_turn() == 1
 
 
-def features(state):
+def four_dimension_features(state):
     # type: (State) -> tuple[float, ...]
     """
     Extract features from this state. Remember that every feature vector returned should have the same length.
@@ -114,18 +116,40 @@ def features(state):
     :return: A tuple of floats: a feature vector representing this state.
     """
 
-    # How many ships does p1 have in garrisons?
-    p1_garrisons = 0.0
-    # How many ships does p2 have in garrisons?
-    p2_garrisons = 0.0
+    # Find out which player we are
+    my_id = state.whose_turn()
+    other_id = util.other(my_id)
 
-    ???
+    # How many ships does p1 have in garrisons?
+    p1_garrisons = util.player_garissons(state, my_id)
+    # How many ships does p2 have in garrisons?
+    p2_garrisons = util.player_garissons(state, other_id)
+
 
     # How many ships does p1 have in fleets?
-    p1_fleets = 0.0
+    p1_fleets = util.player_fleets(state, my_id)
     # How many ships does p2 have in fleets?
-    p2_fleets = 0.0
-
-    ???
+    p2_fleets = util.player_fleets(state, other_id)
 
     return p1_garrisons, p2_garrisons, p1_fleets, p2_fleets
+
+def test_feature(state):
+    # type: (State) -> tuple[float, ...]
+
+    # Find out which player we are
+    my_id = state.whose_turn()
+    other_id = util.other(my_id)
+
+    p1_avg_growth = util.average_plaet_growth_rate(state, my_id)
+    p2_avg_growth = util.average_plaet_growth_rate(state, other_id)
+
+    p1_ratio_ship = util.ratio_ships(state, my_id)
+    p2_ratio_ship = util.ratio_ships(state, other_id)
+
+    # How many ships does p1 have in fleets?
+    p1_fleets = util.player_fleets(state, my_id)
+    # How many ships does p2 have in fleets?
+    p2_fleets = util.player_fleets(state, other_id)
+
+    return p1_avg_growth, p2_avg_growth, p1_ratio_ship, p2_ratio_ship, p1_fleets, p2_fleets
+

@@ -34,13 +34,13 @@ class Bot:
     def get_move(self, state):
 
         if random.random() < self.__nomove:
+            return None
 
-            # IMPLEMENT: Make no move
-            pass
-
-        #IMPLEMENT: Make a random move (but not None).
-        pass
-
+        moves = state.moves()  # type: list[tuple[int, int]]
+        moves.remove(None)
+        if len(moves) == 0:
+            return None
+        return random.choice(moves)
 
 def empty(n):
     """

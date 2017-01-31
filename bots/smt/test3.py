@@ -14,10 +14,13 @@ d = x + y > -5
 kb = KB()
 
 kb.add_clause(q)
-kb.add_clause(???)
-kb.add_clause(???)
-kb.add_clause(???)
-kb.add_clause(???)
+kb.add_clause(~a, ~c)
+kb.add_clause(a, c)
+kb.add_clause(b)
+kb.add_clause(d)
 
 for model in kb.models():
-    print model
+    print(model)
+
+# Print out whether the KB is satisfiable (if there are no models, it is not satisfiable)
+print(kb.satisfiable())

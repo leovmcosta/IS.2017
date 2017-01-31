@@ -6,7 +6,7 @@
 
 from api import State, util
 import random
-import smt
+from bots.smt.smt import heuristic
 
 class Bot:
 
@@ -40,7 +40,7 @@ class Bot:
             return (1.0, None) if state.winner() == 1 else (-1.0, None)
 
         if depth == self.__max_depth:
-            return smt.heuristic(state), None
+            return heuristic(state), None
 
         best_value = float('-inf') if maximizing(state) else float('inf')
         best_move = None

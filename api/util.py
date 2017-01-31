@@ -8,6 +8,34 @@ import traceback
 
 from api import Planet
 import importlib
+from functools import reduce
+from sklearn.externals import joblib
+
+def player_garissons(
+    state,  # type: State
+    player_id  # type: int
+):
+    # type: () -> int
+
+    count = 0
+    for mine in state.planets(player_id):
+        count += state.garrison(mine)
+
+    return count
+
+def player_fleets(
+    state,  # type: State
+    player_id  # type: int
+):
+    # type: () -> int
+
+    count = 0
+    # Count the fleets
+    for fleet in state.fleets():
+        if fleet.owner() == player_id:
+            count += fleet.size()
+
+    return count
 
 def other(
         player_id # type: int
@@ -74,7 +102,11 @@ def combine_heuristics(*args):
     :rtype: float
     """
 
-    return max(-1.0, min(1.0, reduce(lambda a, (w, h): a + (w * h), args, 0)))
+    def function(a, p):
+        w, h = p
+        return a + (w * h)
+
+    return max(-1.0, min(1.0, reduce(function, args, 0)))
 
 def load_player(name, classname='Bot'):
     #
@@ -90,6 +122,7 @@ def load_player(name, classname='Bot'):
     path = './bots/{}/{}.py'.format(name, name)
 
     # Load the python file (making it a _module_)
+    print(name)
     try:
         module = importlib.import_module('bots.{}.{}'.format(name, name))
     except:
@@ -116,3 +149,54 @@ The universal speed of a spaceship: ie. how much each fleet moves per plie.
 (This just says that it moves from one corner of the playing field to the other in ten plies)
 """
 SPEED = math.sqrt(2.0) / 10
+
+def average_plaet_growth_rate(
+    state,  # type: State
+    player_id  # type: int
+):
+    # type: () -> int
+    if len(state.planets(player_id)) == 0:
+        return 0
+
+    count = 0
+    for mine in state.planets(player_id):  # type: Planet
+        count += mine.size()
+
+    return count/len(state.planets(player_id))
+
+
+
+def load_player_ml(name, classname='Bot'):
+    #
+    """
+    Accepts a string representing a bot and returns an instance of that bot. If the name is 'random'
+    this function will load the file ./bots/random/random.py and instantiate the class "Bot"
+    from that file.
+
+    :param name: The name of a bot
+    :return: An instantiated Bot
+    """
+    name = name.lower()
+    model = './bots/ml/'+name+'-model.pkl'
+
+    # Load the python file (making it a _module_)
+    try:
+        module = importlib.import_module('bots.ml.ml')
+    except:
+        print('ERROR: Could not load the python file {}, for player with name {}. Are you sure your Bot has the right filename in the right place? Does your python file have any syntax errors?'.format(path, name))
+        sys.exit(1)
+
+    # Get a reference to the class
+    try:
+        cls = getattr(module, classname)
+        if os.path.isfile(model):
+            player = cls(True, 4, os.path.abspath(model))  # Instantiate the class
+            player.__init__(True, 4, os.path.abspath(model))
+        else:
+            player = cls()
+            player.__init__()
+    except:
+        print('ERROR: Could not load the class "Bot" {} with model {}.'.format(classname, model))
+        sys.exit()
+
+    return player

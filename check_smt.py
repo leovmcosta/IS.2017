@@ -11,7 +11,7 @@ from bots.smt import smt
 
 REPEATS = 10
 for DEPTH in (3, 4, 5, 6):
-    print 'DEPTH is {}'.format(DEPTH)
+    print('DEPTH is {}'.format(DEPTH))
     for MOVES in (5, 13, 17):
 
         ab = alphabeta.Bot(randomize=False, depth=DEPTH)
